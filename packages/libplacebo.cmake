@@ -13,6 +13,7 @@ ExternalProject_Add(libplacebo
     GIT_CLONE_FLAGS "--filter=tree:0"
     GIT_SUBMODULES ""
     UPDATE_COMMAND ""
+    PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/libplacebo-0001-python314-vkxml.patch
     CONFIGURE_COMMAND ""
     COMMAND bash -c "rm -rf <SOURCE_DIR>/3rdparty/fast_float"
     COMMAND bash -c "ln -s ${src_fast_float} <SOURCE_DIR>/3rdparty/fast_float"
