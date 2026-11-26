@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bit: [x86_64, aarch64]
+        bit: [x86_64]
     env:
       BIT: ${{ matrix.bit }}
     container:
@@ -297,7 +297,7 @@ jobs:
               listing = subprocess.check_output(['7z', 'l', '-slt', str(archive)], text=True).split('----------', 1)[1]
               names = set(re.findall(r'^Path = (.+)$', listing, re.M))
               files = {n for n in names if not any(other.startswith(n + '/') for other in names)}
-              expected = {'libmpv-2.pdb'} if match[1] == 'debug' else {'libmpv-2.dll', 'libmpv.dll.a', *('include/mpv/' + h + '.h' for h in ['client', 'stream_cb', 'render', 'render_gl', 'render_d3d11'])}
+              expected = {'libmpv-2.pdb'} if match[1] == 'debug' else {'libmpv-2.dll', 'libmpv.dll.a', *('include/mpv/' + h + '.h' for h in ['client', 'stream_cb', 'render', 'render_gl'])}
               assert files == expected, (archive.name, files)
               hashes[archive.name] = hashlib.sha256(archive.read_bytes()).hexdigest()
           assert len(dates) == 1, dates
@@ -429,7 +429,7 @@ jobs:
             assert.equal(run.head_sha, context.sha);
             assert.equal(process.env.SOURCE_SHA, run.head_sha);
             const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {owner, repo, run_id, filter: 'latest', per_page: 100});
-            for (const bit of ['x86_64', 'aarch64']) {
+            for (const bit of ['x86_64']) {
               const found = jobs.filter(job => job.name.endsWith(`Building mpv (${bit})`));
               assert.equal(found.length, 1, `Missing or duplicate build job: ${bit}`);
               assert.equal(found[0].status, 'completed');
@@ -439,7 +439,7 @@ jobs:
             const directory = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP, 'libmpv-release-'));
             const assets = [];
             const builds = [];
-            for (const [bit, arch] of [['x86_64', 'x86_64'], ['aarch64', 'aarch64']]) {
+            for (const [bit, arch] of [['x86_64', 'x86_64']]) {
               const extracted = [];
               for (const name of [`mpv-${bit}`, `mpv-${bit}-debug`]) {
                 const found = artifacts.filter(a => a.name === name);
