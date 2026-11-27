@@ -25,7 +25,7 @@ ExternalProject_Add(mpv
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""
-    GIT_TAG v0.40.0
+    GIT_TAG v0.42.0
     CONFIGURE_COMMAND ${EXEC} CONF=1 meson setup <BINARY_DIR> <SOURCE_DIR>
         --prefix=${MINGW_INSTALL_PREFIX}
         --libdir=${MINGW_INSTALL_PREFIX}/lib
@@ -44,6 +44,13 @@ ExternalProject_Add(mpv
         -Dmanpage-build=disabled
         -Dlua=disabled
         -Djavascript=disabled
+        -Dsubrandr=disabled
+        -Dlibcurl=disabled
+        -Daaudio=disabled
+        -Daudiotrack=disabled
+        -Damf=disabled
+        -Ddvda=disabled
+        -Dx11-clipboard=disabled
         -Dsdl2-gamepad=disabled
         -Dlibbluray=disabled
         -Ddvdnav=disabled

@@ -8,12 +8,13 @@ ExternalProject_Add(libplacebo
         fast_float
         xxhash
     GIT_REPOSITORY https://github.com/haasn/libplacebo.git
-    GIT_TAG v7.349.0
+    # v7.387.0 is the minimum mpv 0.42 accepts. Its VkXML parser already
+    # takes an Element, so the 7.349 Python 3.14 patch is not applied.
+    GIT_TAG v7.387.0
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     GIT_SUBMODULES ""
     UPDATE_COMMAND ""
-    PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/libplacebo-0001-python314-vkxml.patch
     CONFIGURE_COMMAND ""
     COMMAND bash -c "rm -rf <SOURCE_DIR>/3rdparty/fast_float"
     COMMAND bash -c "ln -s ${src_fast_float} <SOURCE_DIR>/3rdparty/fast_float"

@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bit: [x86_64, aarch64]
+        bit: [x86_64]
     env:
       BIT: ${{ matrix.bit }}
     container:
@@ -133,10 +133,10 @@ jobs:
           for package in mpv ffmpeg; do
             if [[ $package == mpv ]]; then
               url=https://github.com/mpv-player/mpv.git
-              tag=v0.40.0
+              tag=v0.42.0
             else
               url=https://github.com/FFmpeg/FFmpeg.git
-              tag=n7.1.5
+              tag=n9.1
             fi
             source="$PWD/src_packages/$package"
             test ! -L "$PWD/src_packages"
@@ -147,7 +147,7 @@ jobs:
             fi
             git -C "$source" fetch --filter=tree:0 "$url" "refs/tags/$tag"
             if [[ $package == mpv ]]; then
-              test "$(git -C "$source" rev-parse 'FETCH_HEAD^{commit}')" = e48ac7ce08462f5e33af6ef9deeac6fa87eef01e
+              test "$(git -C "$source" rev-parse 'FETCH_HEAD^{commit}')" = b0841e8c4d156b8403dc1876c4cbd9011eb583f3
             fi
             git -C "$source" -c core.autocrlf=false checkout --force --detach 'FETCH_HEAD^{commit}'
             git -C "$source" clean -ffdx
@@ -210,7 +210,7 @@ jobs:
             done
           fi
           ninja -C build_$BIT spirv-cross-fullclean
-          test "$(git -C src_packages/mpv rev-parse HEAD)" = e48ac7ce08462f5e33af6ef9deeac6fa87eef01e
+          test "$(git -C src_packages/mpv rev-parse HEAD)" = b0841e8c4d156b8403dc1876c4cbd9011eb583f3
           ninja -C build_$BIT mpv
 
       - name: Packaging mpv
@@ -291,7 +291,7 @@ jobs:
           dates = set()
           hashes = {}
           for archive in archives:
-              match = re.fullmatch(r'mpv-(dev|debug)-' + re.escape(arch) + r'-(\d{8})-git-e48ac7ce08\.7z', archive.name)
+              match = re.fullmatch(r'mpv-(dev|debug)-' + re.escape(arch) + r'-(\d{8})-git-b0841e8c4d\.7z', archive.name)
               assert match, archive.name
               dates.add(match[2])
               listing = subprocess.check_output(['7z', 'l', '-slt', str(archive)], text=True).split('----------', 1)[1]
@@ -318,7 +318,7 @@ jobs:
                   dependencies[repo.name] = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
                   dependency_trees[repo.name] = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD^{tree}'], text=True).strip()
           patches = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((root / 'packages').glob('*.patch'))}
-          metadata = {'run_id': int(os.environ['GITHUB_RUN_ID']), 'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']), 'source_sha': source, 'architecture': bit, 'date': dates.pop(), 'mpv': 'v0.40.0', 'ffmpeg': 'n7.1.5', 'archives': hashes, 'dependencies': dependencies, 'dependency_trees': dependency_trees, 'comparison_cache_run': os.environ['COMPARISON_CACHE_RUN'], 'patches': patches, 'toolchain': tools, 'pdb': identity}
+          metadata = {'run_id': int(os.environ['GITHUB_RUN_ID']), 'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']), 'source_sha': source, 'architecture': bit, 'date': dates.pop(), 'mpv': 'v0.42.0', 'ffmpeg': 'n9.1', 'archives': hashes, 'dependencies': dependencies, 'dependency_trees': dependency_trees, 'comparison_cache_run': os.environ['COMPARISON_CACHE_RUN'], 'patches': patches, 'toolchain': tools, 'pdb': identity}
           (release / ('build-' + bit + '.json')).write_text(json.dumps(metadata, indent=2) + '\n')
           (release / ('SHA256SUMS-' + bit)).write_text(''.join(digest + '  ' + name + '\n' for name, digest in hashes.items()))
           PY
@@ -458,8 +458,8 @@ jobs:
                 fs.writeFileSync(zip, bytes);
                 const entries = execFileSync('unzip', ['-Z1', zip], {encoding: 'utf8'}).trim().split(/\r?\n/);
                 const allowed = name.endsWith('-debug')
-                  ? new RegExp(`^mpv-debug-${arch}-[0-9]{8}-git-e48ac7ce08\\.7z$`)
-                  : new RegExp(`^(mpv-dev-${arch}-[0-9]{8}-git-e48ac7ce08\\.7z|build-${bit}\\.json|SHA256SUMS-${bit})$`);
+                  ? new RegExp(`^mpv-debug-${arch}-[0-9]{8}-git-b0841e8c4d\\.7z$`)
+                  : new RegExp(`^(mpv-dev-${arch}-[0-9]{8}-git-b0841e8c4d\\.7z|build-${bit}\\.json|SHA256SUMS-${bit})$`);
                 assert.equal(entries.length, name.endsWith('-debug') ? 1 : 3);
                 assert.equal(new Set(entries).size, entries.length);
                 assert(entries.every(entry => allowed.test(entry)), `Unexpected artifact files: ${name}`);
@@ -474,10 +474,10 @@ jobs:
               assert.equal(metadata.source_sha, run.head_sha, 'Source differs from the build run SHA');
               assert.equal(metadata.architecture, bit);
               assert.match(metadata.date, /^[0-9]{8}$/);
-              assert.equal(metadata.mpv, 'v0.40.0');
-              assert.equal(metadata.ffmpeg, 'n7.1.5');
-              assert.equal(metadata.dependencies.mpv, 'e48ac7ce08462f5e33af6ef9deeac6fa87eef01e');
-              const expected = ['dev', 'debug'].map(kind => `mpv-${kind}-${arch}-${metadata.date}-git-e48ac7ce08.7z`);
+              assert.equal(metadata.mpv, 'v0.42.0');
+              assert.equal(metadata.ffmpeg, 'n9.1');
+              assert.equal(metadata.dependencies.mpv, 'b0841e8c4d156b8403dc1876c4cbd9011eb583f3');
+              const expected = ['dev', 'debug'].map(kind => `mpv-${kind}-${arch}-${metadata.date}-git-b0841e8c4d.7z`);
               assert.deepEqual(Object.keys(metadata.archives).sort(), [...expected].sort());
               assert.deepEqual(extracted.filter(name => name.endsWith('.7z')).sort(), [...expected].sort());
               const sums = [];
