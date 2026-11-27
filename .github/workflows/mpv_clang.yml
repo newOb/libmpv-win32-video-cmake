@@ -130,10 +130,13 @@ jobs:
 
       - name: Preparing pinned sources
         run: |
-          for package in mpv ffmpeg; do
+          for package in mpv ffmpeg libplacebo; do
             if [[ $package == mpv ]]; then
               url=https://github.com/mpv-player/mpv.git
               tag=v0.42.0
+            elif [[ $package == libplacebo ]]; then
+              url=https://github.com/haasn/libplacebo.git
+              tag=v7.387.0
             else
               url=https://github.com/FFmpeg/FFmpeg.git
               tag=n9.1
@@ -148,6 +151,8 @@ jobs:
             git -C "$source" fetch --filter=tree:0 "$url" "refs/tags/$tag"
             if [[ $package == mpv ]]; then
               test "$(git -C "$source" rev-parse 'FETCH_HEAD^{commit}')" = b0841e8c4d156b8403dc1876c4cbd9011eb583f3
+            elif [[ $package == libplacebo ]]; then
+              test "$(git -C "$source" rev-parse 'FETCH_HEAD^{commit}')" = 275f7dea27924cdd34ab2e6c20e448b6bc4fab65
             fi
             git -C "$source" -c core.autocrlf=false checkout --force --detach 'FETCH_HEAD^{commit}'
             git -C "$source" clean -ffdx
@@ -211,6 +216,7 @@ jobs:
           fi
           ninja -C build_$BIT spirv-cross-fullclean
           test "$(git -C src_packages/mpv rev-parse HEAD)" = b0841e8c4d156b8403dc1876c4cbd9011eb583f3
+          test "$(git -C src_packages/libplacebo rev-parse HEAD)" = 275f7dea27924cdd34ab2e6c20e448b6bc4fab65
           ninja -C build_$BIT mpv
 
       - name: Packaging mpv
